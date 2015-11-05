@@ -5,7 +5,7 @@ include $(PROJECT_ROOT)/make/leaf.cfg
 #### CONFIG ####################################################################
 #For debugging symbols add -DLWIP_DEBUG
 # COMPILER/LINKER
-CFLAGS+=-g -O0 -Wall
+CFLAGS+=-g -O0 -Wall -mfloat-abi=hard -mfpu=fpv4-sp-d16
 
 # OUTPUT
 LWIP_EXEC=stm32-lwip

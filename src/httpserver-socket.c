@@ -25,14 +25,14 @@
  ******************************************************************************
  */
 
-#include "lwip/opt.h"
-#include "lwip/arch.h"
-#include "lwip/api.h"
-#include "lwip/inet.h"
-#include "lwip/sockets.h"
+#include <lwip/opt.h>
+#include <lwip/arch.h>
+#include <lwip/api.h>
+#include <lwip/inet.h>
+#include <lwip/sockets.h>
 
-#include "string.h"
-#include "cmsis_os.h"
+#include <string.h>
+#include <cmsis_os.h>
 #include <httpserver-socket.h>
 #include <hal-ethernetif.h>
 #include <cmsis_os.h>
