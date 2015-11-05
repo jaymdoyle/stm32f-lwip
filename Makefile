@@ -12,7 +12,8 @@ LWIP_EXEC=stm32-lwip
 
 #### PATHS #####################################################################
 
-BSP_PATH=/opt/rtems-4.11/arm-rtems4.11/stm32f7x/lib/include/bsp
+BSP_PATH=$(PROJECT_ROOT)/arm-rtems4.11/stm32f7x/lib/include/bsp
+LWIP_PATH=$(PROJECT_ROOT)/arm-rtems4.11/stm32f7x/lwip/include
 
 # STM32F LWIP
 STM32F_LWIP_PATH=.
@@ -32,7 +33,7 @@ SOURCES =  $(STM32F_LWIP_SRC)
 STM32F_LWIP_H=$(STM32F_LWIP_INCL_PATH)
 
 # HEADERS
-HEADERS=-I$(STM32F_LWIP_H) -I$(BSP_PATH)
+HEADERS=-I$(STM32F_LWIP_H) -I$(LWIP_PATH) -I$(BSP_PATH)
 
 ################################################################################
 
@@ -52,7 +53,6 @@ ASMOBJS=$(patsubst %.S,${ARCH}/%.o,$(notdir $(ASMSRCS)))
 OBJS=$(COBJS) $(ASMOBJS)
 
 all:${ARCH} $(LIB)
-	echo "Source path = " $(STM32F_LWIP_SRC_PATH)
 
 $(LIB): $(OBJS)
 	$(AR)  rcs  $@ $^

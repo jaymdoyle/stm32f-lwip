@@ -40,8 +40,8 @@
 #include <cmsis_os.h>
 #include <sched.h>
 #include <rtems/score/statesimpl.h>
-#include <stdio.h>
 #include <hal-error.h>
+#include <stdio.h>
 
 #if ( osFeature_Semaphore > 65535 )
 #error Invalid "osFeature_Semaphore" value!

@@ -28,9 +28,8 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
+#include <bspopts.h>
 #include <stm32f7xx_hal.h>
-//#include <lwip/opt.h>
-//#include <lwip/timers.h>
 #include <netif/etharp.h>
 #include <hal-ethernetif.h>
 #include <string.h>
