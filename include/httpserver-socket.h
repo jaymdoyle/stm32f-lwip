@@ -37,7 +37,7 @@
  *         when the TCP/IP stack startup is complete.
  * @retval None
  */
-void http_server_socket_init( rtems_id barrier_id );
+void http_server_socket_init( void );
 
 /**
  * @brief serve tcp connection
