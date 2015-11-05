@@ -16,8 +16,8 @@ BSP_PATH=/opt/rtems-4.11/arm-rtems4.11/stm32f7x/lib/include/bsp
 
 # STM32F LWIP
 STM32F_LWIP_PATH=.
-STM32F_LWIP_SRC_PATH=$(LWIP_PATH)/src
-STM32F_LWIP_INCL_PATH=$(LWIP_SRC_PATH)/include
+STM32F_LWIP_SRC_PATH=$(STM32F_LWIP_PATH)/src
+STM32F_LWIP_INCL_PATH=$(STM32F_LWIP_PATH)/include
 
 #### SOURCES ###################################################################
 
@@ -52,6 +52,7 @@ ASMOBJS=$(patsubst %.S,${ARCH}/%.o,$(notdir $(ASMSRCS)))
 OBJS=$(COBJS) $(ASMOBJS)
 
 all:${ARCH} $(LIB)
+	echo "Source path = " $(STM32F_LWIP_SRC_PATH)
 
 $(LIB): $(OBJS)
 	$(AR)  rcs  $@ $^
