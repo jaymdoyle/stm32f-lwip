@@ -160,9 +160,8 @@ static void http_server_socket_thread( void *arg )
 {
   int                sock, newconn, size;
   struct sockaddr_in address, remotehost;
-  rtems_id           tcpip_barrier_id = *((rtems_id*) arg);
 
-  rtems_barrier_wait(tcpip_barrier_id, RTEMS_NO_TIMEOUT);
+  (void) arg;
 
   /* create a TCP socket */
   if ( ( sock = socket( AF_INET, SOCK_STREAM, 0 ) ) < 0 ) {
