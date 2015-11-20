@@ -46,6 +46,7 @@
 #define IFNAME1 'n'
 
 #define LAN8742A_PHY_ADDRESS 0x00
+#define TRACE_ENABLED 1
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
@@ -121,6 +122,7 @@ static void stm32f_ethernet_isr( void *argData )
  * @param  heth: ETH handle
  * @retval None
  */
+#ifdef STM32F7_DISCOVERY
 void HAL_ETH_MspInit( ETH_HandleTypeDef *heth )
 {
   GPIO_InitTypeDef GPIO_InitStructure;
@@ -175,6 +177,139 @@ void HAL_ETH_MspInit( ETH_HandleTypeDef *heth )
   /* Enable ETHERNET clock  */
   __HAL_RCC_ETH_CLK_ENABLE();
 }
+
+/* Initialization code for STM32F756_Eval2 board*/
+#elif STM32F7_EVAL2
+void HAL_ETH_MspInit(ETH_HandleTypeDef *heth)
+{
+  GPIO_InitTypeDef GPIO_InitStructure;
+
+  /* Enable GPIOs clocks */
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOE_CLK_ENABLE();
+  __HAL_RCC_GPIOF_CLK_ENABLE();
+  __HAL_RCC_GPIOG_CLK_ENABLE();
+  __HAL_RCC_GPIOH_CLK_ENABLE();
+  __HAL_RCC_GPIOI_CLK_ENABLE();
+
+/* Ethernet pins configuration ************************************************/
+  /*
+        ETH_MDIO -------------------------> PA2
+        ETH_MDC --------------------------> PC1
+        ETH_PPS_OUT ----------------------> PB5
+        ETH_MII_RXD2 ---------------------> PH6
+        ETH_MII_RXD3 ---------------------> PH7
+        ETH_MII_TX_CLK -------------------> PC3
+        ETH_MII_TXD2 ---------------------> PC2
+        ETH_MII_TXD3 ---------------------> PE2 (or PB8 if trace is enabled)
+        ETH_MII_RX_CLK -------------------> PA1
+        ETH_MII_RX_DV --------------------> PA7
+        ETH_MII_RXD0 ---------------------> PC4
+        ETH_MII_RXD1 ---------------------> PC5
+        ETH_MII_TX_EN --------------------> PG11
+        ETH_MII_TXD0 ---------------------> PG13
+        ETH_MII_TXD1 ---------------------> PG14
+        ETH_MII_RX_ER --------------------> PI10 (not configured)
+        ETH_MII_CRS ----------------------> PA0  (not configured)
+        ETH_MII_COL ----------------------> PH3  (not configured)
+  */
+
+  /* Configure PA1, PA2 and PA7 */
+  GPIO_InitStructure.Speed = GPIO_SPEED_HIGH;
+  GPIO_InitStructure.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStructure.Pull = GPIO_NOPULL;
+  GPIO_InitStructure.Alternate = GPIO_AF11_ETH;
+  GPIO_InitStructure.Pin = GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_7;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+  /* Note : ETH_MDIO is connected to PA2 which is shared with other signals like SAI2_SCKB.
+     By default on STM32756G-EVAL board, PA2 is connected to SAI2_SCKB, so to connect PA2 to ETH_MDIO :
+    - unsolder bridge SB24 (SAI2_CKB)
+    - solder bridge SB5 (ETH_MDIO) */
+
+  /* Configure PB5 */
+  GPIO_InitStructure.Pin = GPIO_PIN_5;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+  /* If ETM interface is used then you can't use PE2 for
+   * ETH_MII_TX3 because that must be used for TRACE_CLK
+   */
+#if TRACE_ENABLED
+  /* Configure PB8 */
+  GPIO_InitStructure.Pin = GPIO_PIN_8;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
+#else
+  /* Configure PE2 */
+  GPIO_InitStructure.Pin = GPIO_PIN_2;
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStructure);
+#endif
+
+  /* Configure PC1, PC2, PC3, PC4 and PC5 */
+  GPIO_InitStructure.Pin = GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStructure);
+
+  /* Note : ETH_MDC is connected to PC1 which is shared with other signals like SAI1_SDA.
+     By default on STM32756G-EVAL board, PC1 is connected to SAI1_SDA, so to connect PC1 to ETH_MDC :
+    - unsolder bridge SB22 (SAI1_SDA)
+    - solder bridge SB33 (ETH_MDC) */
+
+  /* Configure PG11, PG14 and PG13 */
+  GPIO_InitStructure.Pin =  GPIO_PIN_11 | GPIO_PIN_13 | GPIO_PIN_14;
+  HAL_GPIO_Init(GPIOG, &GPIO_InitStructure);
+
+  /* Configure PH6, PH7 */
+  GPIO_InitStructure.Pin =  GPIO_PIN_6 | GPIO_PIN_7;
+  HAL_GPIO_Init(GPIOH, &GPIO_InitStructure);
+
+  /* Configure PA0
+  GPIO_InitStructure.Pin =  GPIO_PIN_0;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+  Note: Ethernet Full duplex mode works properly in the default setting
+  (which MII_CRS is not connected to PA0 of STM32F756NGH6) because PA0 is shared
+  with MC_ENA.
+  If Half duplex mode is needed, uncomment PA0 configuration code source (above
+  the note) and close the SB36 solder bridge of the STM32756G-EVAL board .
+  */
+
+  /* Configure PH3
+  GPIO_InitStructure.Pin =  GPIO_PIN_3;
+  HAL_GPIO_Init(GPIOH, &GPIO_InitStructure);
+
+  Note: Ethernet Full duplex mode works properly in the default setting
+  (which MII_COL is not connected to PH3 of STM32F756NGH6) because PH3 is shared
+  with SDRAM chip select SDNE0.
+  If Half duplex mode is needed, uncomment PH3 configuration code source (above
+  the note) and close SB47 solder bridge of the STM32756G-EVAL board.
+  */
+
+  /* Configure PI10
+  GPIO_InitStructure.Pin = GPIO_PIN_10;
+  HAL_GPIO_Init(GPIOI, &GPIO_InitStructure);
+
+  Note: Ethernet works properly in the default setting (which RX_ER is not
+  connected to PI10 of STM32F756NGH6) because PI10 is shared with data signal
+  of SDRAM.
+  If RX_ER signal is needed, uncomment PI10 configuration code source (above
+  the note) then remove R248 and solder SB9 of the STM32756G-EVAL board.
+  */
+
+  // Install HAL Ethernet ISR
+  rtems_interrupt_handler_install(
+    ETH_IRQn,
+    NULL,
+    0,
+    stm32f_ethernet_isr,
+    heth );
+
+  /* Enable ETHERNET clock  */
+  __HAL_RCC_ETH_CLK_ENABLE();
+}
+#endif
+
+
 
 /**
  * @brief  Ethernet Rx Transfer completed callback
