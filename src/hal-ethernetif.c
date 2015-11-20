@@ -46,6 +46,7 @@
 #define IFNAME1 'n'
 
 #define LAN8742A_PHY_ADDRESS 0x00
+#define DP83848_PHY_ADDRESS             0x01
 #define TRACE_ENABLED 1
 
 /* Private macro -------------------------------------------------------------*/
@@ -370,6 +371,7 @@ __weak void stm32f_set_mac_addr(uint8_t* macaddress){
  * @param netif the already initialized lwip network interface structure
  *        for this ethernetif
  */
+#ifdef STM32F7_DISCOVERY
 static void low_level_init( struct netif *netif )
 {
   uint8_t macaddress[ 6 ];
@@ -433,6 +435,93 @@ static void low_level_init( struct netif *netif )
   /* Enable MAC and DMA transmission and reception */
   HAL_ETH_Start( &EthHandle );
 }
+
+#elif STM32F7_EVAL2
+
+static void low_level_init(struct netif *netif)
+{
+  uint32_t regvalue = 0;
+  uint8_t macaddress[6]= { MAC_ADDR0, MAC_ADDR1, MAC_ADDR2, MAC_ADDR3, MAC_ADDR4, MAC_ADDR5 };
+
+  EthHandle.Instance = ETH;
+  EthHandle.Init.MACAddr = macaddress;
+  EthHandle.Init.AutoNegotiation = ETH_AUTONEGOTIATION_ENABLE;
+  EthHandle.Init.Speed = ETH_SPEED_100M;
+  EthHandle.Init.DuplexMode = ETH_MODE_FULLDUPLEX;
+  EthHandle.Init.MediaInterface = ETH_MEDIA_INTERFACE_MII;
+  EthHandle.Init.RxMode = ETH_RXPOLLING_MODE;
+  EthHandle.Init.ChecksumMode = ETH_CHECKSUM_BY_HARDWARE;
+  EthHandle.Init.PhyAddress = DP83848_PHY_ADDRESS;
+
+  /* configure ethernet peripheral (GPIOs, clocks, MAC, DMA) */
+  if (HAL_ETH_Init(&EthHandle) == HAL_OK)
+  {
+    /* Set netif link flag */
+    netif->flags |= NETIF_FLAG_LINK_UP;
+  }
+
+  /* Initialize Tx Descriptors list: Chain Mode */
+  HAL_ETH_DMATxDescListInit(&EthHandle, DMATxDscrTab, &Tx_Buff[0][0], ETH_TXBUFNB);
+
+  /* Initialize Rx Descriptors list: Chain Mode  */
+  HAL_ETH_DMARxDescListInit(&EthHandle, DMARxDscrTab, &Rx_Buff[0][0], ETH_RXBUFNB);
+
+  /* set MAC hardware address length */
+  netif->hwaddr_len = ETHARP_HWADDR_LEN;
+
+  /* set MAC hardware address */
+  netif->hwaddr[0] =  MAC_ADDR0;
+  netif->hwaddr[1] =  MAC_ADDR1;
+  netif->hwaddr[2] =  MAC_ADDR2;
+  netif->hwaddr[3] =  MAC_ADDR3;
+  netif->hwaddr[4] =  MAC_ADDR4;
+  netif->hwaddr[5] =  MAC_ADDR5;
+
+  /* maximum transfer unit */
+  netif->mtu = 1500;
+
+  /* device capabilities */
+  /* don't set NETIF_FLAG_ETHARP if this device is not an ethernet one */
+  netif->flags |= NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP;
+
+  /* Enable MAC and DMA transmission and reception */
+  HAL_ETH_Start(&EthHandle);
+
+  /**** Configure PHY to generate an interrupt when Eth Link state changes ****/
+  /* Read Register Configuration */
+  HAL_ETH_ReadPHYRegister(&EthHandle, PHY_MICR, &regvalue);
+
+  regvalue |= (PHY_MICR_INT_EN | PHY_MICR_INT_OE);
+
+  /* Enable Interrupts */
+  HAL_ETH_WritePHYRegister(&EthHandle, PHY_MICR, regvalue );
+
+  /* Read Register Configuration */
+  HAL_ETH_ReadPHYRegister(&EthHandle, PHY_MISR, &regvalue);
+
+  regvalue |= PHY_MISR_LINK_INT_EN;
+
+  /* create a binary semaphore used for informing ethernetif of frame reception */
+  osSemaphoreDef( SEM , rtems_build_name( 'E', 'T', 'H', 'I' ));
+  s_xSemaphore = osSemaphoreCreate( osSemaphore( SEM ), 0 );
+
+  /* create the task that handles the ETH_MAC */
+  osThreadDef( EthIf,
+    ethernetif_input,
+    osPriorityRealtime,
+    1,
+    INTERFACE_THREAD_STACK_SIZE,
+    rtems_build_name( 'E', 'T', 'H', 'I' ));
+  osThreadCreate( osThread( EthIf ), netif );
+
+  /* Enable Interrupt on change of link status */
+  HAL_ETH_WritePHYRegister(&EthHandle, PHY_MISR, regvalue);
+}
+
+
+#endif
+
+
 
 /**
  * @brief This function should do the actual transmission of the packet. The packet is
