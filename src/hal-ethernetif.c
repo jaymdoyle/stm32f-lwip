@@ -183,7 +183,7 @@ void HAL_ETH_MspInit( ETH_HandleTypeDef *heth )
 #elif STM32F7_EVAL2
 void HAL_ETH_MspInit(ETH_HandleTypeDef *heth)
 {
-  GPIO_InitTypeDef GPIO_InitStructure
+  GPIO_InitTypeDef GPIO_InitStructure;
 
   /* Enable GPIOs clocks */
   __HAL_RCC_GPIOA_CLK_ENABLE();
