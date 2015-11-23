@@ -479,13 +479,8 @@ static void low_level_init(struct netif *netif)
   /* set MAC hardware address length */
   netif->hwaddr_len = ETHARP_HWADDR_LEN;
 
-  /* set MAC hardware address */
-  netif->hwaddr[0] =  MAC_ADDR0;
-  netif->hwaddr[1] =  MAC_ADDR1;
-  netif->hwaddr[2] =  MAC_ADDR2;
-  netif->hwaddr[3] =  MAC_ADDR3;
-  netif->hwaddr[4] =  MAC_ADDR4;
-  netif->hwaddr[5] =  MAC_ADDR5;
+  /* set netif MAC hardware address */
+  stm32f_set_mac_addr((uint8_t*) netif->hwaddr);
 
   /* maximum transfer unit */
   netif->mtu = 1500;
