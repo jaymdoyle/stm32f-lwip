@@ -46,7 +46,7 @@
 #define IFNAME1 'n'
 
 #define LAN8742A_PHY_ADDRESS 0x00
-#define DP83848_PHY_ADDRESS             0x01
+#define DP83848_PHY_ADDRESS             0x0B
 #define TRACE_ENABLED 1
 
 /* Private macro -------------------------------------------------------------*/
