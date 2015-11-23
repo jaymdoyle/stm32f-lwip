@@ -459,7 +459,13 @@ static void low_level_init(struct netif *netif)
   EthHandle.Init.Speed = ETH_SPEED_100M;
   EthHandle.Init.DuplexMode = ETH_MODE_FULLDUPLEX;
   EthHandle.Init.MediaInterface = ETH_MEDIA_INTERFACE_MII;
+
+#ifdef TEST_NO_PHY_WRITES
   EthHandle.Init.RxMode = ETH_RXPOLLING_MODE;
+#else
+  EthHandle.Init.RxMode = ETH_RXINTERRUPT_MODE;
+#endif
+
   EthHandle.Init.ChecksumMode = ETH_CHECKSUM_BY_HARDWARE;
   EthHandle.Init.PhyAddress = DP83848_PHY_ADDRESS;
 
@@ -489,6 +495,8 @@ static void low_level_init(struct netif *netif)
   /* don't set NETIF_FLAG_ETHARP if this device is not an ethernet one */
   netif->flags |= NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP;
 
+#if TEST_NO_PHY_WRITES
+
   /* Enable MAC and DMA transmission and reception */
   HAL_ETH_Start(&EthHandle);
 
@@ -506,6 +514,8 @@ static void low_level_init(struct netif *netif)
 
   regvalue |= PHY_MISR_LINK_INT_EN;
 
+#endif
+
   /* create a binary semaphore used for informing ethernetif of frame reception */
   osSemaphoreDef( SEM , rtems_build_name( 'E', 'T', 'H', 'I' ));
   s_xSemaphore = osSemaphoreCreate( osSemaphore( SEM ), 0 );
@@ -517,10 +527,13 @@ static void low_level_init(struct netif *netif)
     1,
     INTERFACE_THREAD_STACK_SIZE,
     rtems_build_name( 'E', 'T', 'H', 'I' ));
+
   osThreadCreate( osThread( EthIf ), netif );
 
+#if TEST_NO_PHY_WRITES
   /* Enable Interrupt on change of link status */
   HAL_ETH_WritePHYRegister(&EthHandle, PHY_MISR, regvalue);
+#endif
 }
 
 
