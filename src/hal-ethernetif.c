@@ -450,8 +450,14 @@ static void low_level_init( struct netif *netif )
 
 static void low_level_init(struct netif *netif)
 {
+  uint8_t macaddress[6];
+
+#if TEST_NO_PHY_WRITES
   uint32_t regvalue = 0;
-  uint8_t macaddress[6]= { MAC_ADDR0, MAC_ADDR1, MAC_ADDR2, MAC_ADDR3, MAC_ADDR4, MAC_ADDR5 };
+#endif
+
+  // Get Ethernet MAC address
+  stm32f_set_mac_addr((uint8_t*) macaddress);
 
   EthHandle.Instance = ETH;
   EthHandle.Init.MACAddr = macaddress;
@@ -459,13 +465,7 @@ static void low_level_init(struct netif *netif)
   EthHandle.Init.Speed = ETH_SPEED_100M;
   EthHandle.Init.DuplexMode = ETH_MODE_FULLDUPLEX;
   EthHandle.Init.MediaInterface = ETH_MEDIA_INTERFACE_MII;
-
-#ifdef TEST_NO_PHY_WRITES
-  EthHandle.Init.RxMode = ETH_RXPOLLING_MODE;
-#else
   EthHandle.Init.RxMode = ETH_RXINTERRUPT_MODE;
-#endif
-
   EthHandle.Init.ChecksumMode = ETH_CHECKSUM_BY_HARDWARE;
   EthHandle.Init.PhyAddress = DP83848_PHY_ADDRESS;
 
