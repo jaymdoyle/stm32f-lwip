@@ -466,6 +466,8 @@ static void low_level_init(struct netif *netif)
   EthHandle.Init.DuplexMode = ETH_MODE_FULLDUPLEX;
   EthHandle.Init.MediaInterface = ETH_MEDIA_INTERFACE_MII;
   EthHandle.Init.RxMode = ETH_RXINTERRUPT_MODE;
+  //TODO: Remove
+  EthHandle.Init.RxMode = ETH_RXPOLLING_MODE;
   EthHandle.Init.ChecksumMode = ETH_CHECKSUM_BY_HARDWARE;
   EthHandle.Init.PhyAddress = DP83848_PHY_ADDRESS;
 
