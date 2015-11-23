@@ -299,12 +299,13 @@ void HAL_ETH_MspInit(ETH_HandleTypeDef *heth)
 
 
   /* Explicitly configure PG6 and PA7 as inputs */
+  /*
   GPIO_InitStructure.Speed = GPIO_SPEED_HIGH;
   GPIO_InitStructure.Mode = GPIO_MODE_INPUT;
   GPIO_InitStructure.Pull = GPIO_NOPULL;
   GPIO_InitStructure.Pin = GPIO_PIN_6 | GPIO_PIN_7;
   HAL_GPIO_Init(GPIOG, &GPIO_InitStructure);
-
+*/
 
   // Install HAL Ethernet ISR
   rtems_interrupt_handler_install(
