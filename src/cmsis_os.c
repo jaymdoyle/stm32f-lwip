@@ -734,9 +734,15 @@ int32_t osSemaphoreWait(
   rtems_interval  ticks_per_millisec = rtems_clock_get_ticks_per_second() /
                                          1000UL;
 
+  rtems_interval wait_period = ticks_per_millisec * millisec;
+
+  if(millisec == 0xFFFFFFFFUL) {
+    wait_period = RTEMS_NO_TIMEOUT;
+  }
+
   // wait for specified semaphore for the maximum amount of time
   return rtemsConvertReturnCode( rtems_semaphore_obtain( (rtems_id)
-      semaphore_id, RTEMS_WAIT, ( ticks_per_millisec * millisec ) ) );
+      semaphore_id, RTEMS_WAIT, wait_period) );
 }
 
 /// Release a Semaphore

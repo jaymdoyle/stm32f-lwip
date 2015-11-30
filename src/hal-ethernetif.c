@@ -37,7 +37,7 @@
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* The time to block waiting for input. */
-#define TIME_WAITING_FOR_INPUT ( 1000 )
+#define TIME_WAITING_FOR_INPUT ( 0xFFFFFFFF )
 /* Stack size of the interface thread */
 #define INTERFACE_THREAD_STACK_SIZE ( 4 * 1024 )
 
