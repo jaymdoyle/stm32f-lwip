@@ -708,11 +708,7 @@ osSemaphoreId osSemaphoreCreate(
   rtems_status_code ret;
   rtems_id          semaphore_id;
 
-  if ( count > 1 ) {
-    sema_attributes = RTEMS_DEFAULT_ATTRIBUTES;
-  } else {
-    sema_attributes = RTEMS_SIMPLE_BINARY_SEMAPHORE;
-  }
+  sema_attributes = RTEMS_DEFAULT_ATTRIBUTES;
 
   ret = rtems_semaphore_create(
     semaphore_def->sema_name,
