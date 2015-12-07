@@ -33,7 +33,7 @@ SOURCES =  $(STM32F_LWIP_SRC)
 STM32F_LWIP_H=$(STM32F_LWIP_INCL_PATH)
 
 # HEADERS
-HEADERS=-I$(STM32F_LWIP_H) -I$(LWIP_PATH) -I$(BSP_PATH)
+HEADERS=-I$(STM32F_LWIP_H) -I$(LWIP_PATH) -I$(LWIP_PATH)/ipv4 -I$(BSP_PATH)
 
 ################################################################################
 
