@@ -50,6 +50,8 @@ COBJS=$(patsubst %.c,${ARCH}/%.o,$(notdir $(CSRCS)))
 ASMSRCS=$(filter %.S , $(SOURCES))
 ASMOBJS=$(patsubst %.S,${ARCH}/%.o,$(notdir $(ASMSRCS)))
 
+CFLAGS += -DSTM32F7_EVAL2
+
 OBJS=$(COBJS) $(ASMOBJS)
 
 all:${ARCH} $(LIB)
